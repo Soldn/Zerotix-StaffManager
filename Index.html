@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stuff | ZeroTix</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    :root {
+      --bg:#0a0a0d;
+      --panel:#141418;
+      --panel-2:#1a1a1d;
+      --txt:#fff;
+      --muted:#bfc3c9;
+      --accent:#00aaff;
+      --accent-2:#0055ff;
+      --yellow:#ffcc00;
+      --red:#ff3b3b;
+    }
+
+    [data-theme="light"] {
+      --bg:#f7f7f9;
+      --panel:#ffffff;
+      --panel-2:#f0f0f2;
+      --txt:#111;
+      --muted:#333;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:0;
+      min-height:100vh;
+      display:flex; flex-direction:column; align-items:center;
+      font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--txt);
+      background: radial-gradient(circle at top, #101018 0%, var(--bg) 100%);
+      transition:background .3s, color .3s;
+    }
+
+    header{
+      margin:40px 0 10px;
+      font-size:2.2rem; font-weight:700; letter-spacing:2px;
+      color:var(--accent); text-shadow:0 0 10px var(--accent);
+    }
+
+    .theme-toggle {
+      position:absolute;
+      top:25px; right:25px;
+      font-size:1.4rem;
+      cursor:pointer;
+      background:none;
+      border:2px solid var(--accent);
+      border-radius:50%;
+      width:40px; height:40px;
+      display:flex; align-items:center; justify-content:center;
+      color:var(--accent);
+      transition:all .3s ease;
+    }
+    .theme-toggle:hover {
+      background:var(--accent);
+      color:#fff;
+      box-shadow:0 0 15px var(--accent);
+    }
+
+    .search-box{ margin:10px 0 15px; width:100%; display:flex; justify-content:center; flex-wrap:wrap; gap:15px; }
+    .search{
+      width:min(680px,90vw);
+      display:flex; gap:10px;
+      background: #0f0f13; padding:10px; border-radius:14px;
+      border:2px solid var(--accent);
+      box-shadow:0 0 15px rgba(0,170,255,.25) inset;
+    }
+    .search input{
+      flex:1; background:transparent; border:0; outline:0;
+      color:var(--txt); font-size:1rem;
+    }
+    .search button{
+      padding:10px 14px; border:0; border-radius:10px; cursor:pointer;
+      background:var(--accent); color:#fff; font-weight:600;
+    }
+
+    .filters {
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+      margin-bottom:30px;
+    }
+    .filter-btn {
+      background:#141418;
+      border:2px solid var(--accent);
+      color:var(--txt);
+      padding:6px 14px;
+      border-radius:10px;
+      cursor:pointer;
+      font-size:0.9rem;
+      transition:all .3s;
+    }
+    .filter-btn.active, .filter-btn:hover {
+      background:var(--accent);
+      color:#fff;
+      box-shadow:0 0 10px var(--accent);
+    }
+
+    .card-container{
+      display:flex; flex-wrap:wrap; justify-content:center; gap:25px;
+      width:90%; max-width:1000px; padding-bottom:40px;
+    }
+    .card{
+      position:relative;
+      width:100%; max-width:460px;
+      border-radius:20px; padding:22px;
+      background:linear-gradient(145deg, var(--panel-2), #0e0e10);
+      border:2px solid transparent;
+      box-shadow:0 0 25px rgba(0,0,0,.5);
+      overflow:hidden;
+      transition:transform .4s ease, opacity .6s ease, box-shadow .25s ease;
+      opacity:0;
+      transform:translateY(30px);
+    }
+    .card.visible { opacity:1; transform:translateY(0); }
+    .card:hover{ transform:translateY(-4px); box-shadow:0 0 30px rgba(255,255,255,.08); }
+
+    .card.yellow{ border-color:var(--yellow); }
+    .card.blue{ border-color:var(--accent); }
+    .card.red{ border-color:var(--red); }
+
+    .card.deleted::after {
+      content:"✖";
+      position:absolute;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:rgba(255,0,0,0.1);
+      display:flex; align-items:center; justify-content:center;
+      font-size:6rem;
+      color:rgba(255,0,0,0.3);
+      pointer-events:none;
+      z-index:6;
+    }
+
+    .card-content{
+      position:relative;
+      border-radius:16px;
+      padding:18px 20px 22px;
+      background:rgba(20,20,25,.75);
+      border:2px solid rgba(255,255,255,.08);
+      box-shadow:inset 0 0 10px rgba(255,255,255,.05);
+      margin-top:50px;
+    }
+
+    .ribbon{
+      position:absolute;
+      top:18px;
+      left:20px; right:20px;
+      height:34px; line-height:34px;
+      text-align:center; font-weight:700; font-size:.95rem;
+      color:#fff;
+      border-radius:12px;
+      z-index:5;
+    }
+    .ribbon.blue { background:linear-gradient(90deg, var(--accent), var(--accent-2)); }
+    .ribbon.red { background:linear-gradient(90deg, #ff3b3b, #aa0000); }
+
+    .card h2{ margin:0 0 6px; font-size:1.45rem; }
+    .nickname{ color:var(--accent); margin-bottom:12px; }
+    .tag{
+      display:inline-block; margin-bottom:12px;
+      padding:8px 14px; border-radius:12px; font-size:.92rem; font-weight:600;
+      background:#2a2a2f; border:1px solid rgba(255,255,255,.12);
+      color:#e7e7ea;
+    }
+    .role{ font-weight:700; margin-bottom:10px; color:#e9eef7; }
+    .info{ color:#c9cdd3; line-height:1.6; }
+
+    @media (max-width:600px){
+      header{ font-size:1.9rem }
+      .card{ max-width:100% }
+    }
+  </style>
+</head>
+<body>
+  <header>ZeroTix</header>
+  <button class="theme-toggle" id="themeToggle" title="Переключить тему">🌙</button>
+
+  <div class="search-box">
+    <div class="search">
+      <input id="searchInput" type="text" placeholder="Поиск по никнейму или ФИО…" />
+      <button id="clearBtn" title="Сбросить">Сброс</button>
+    </div>
+  </div>
+
+  <div class="filters">
+    <button class="filter-btn active" data-filter="all">Все</button>
+    <button class="filter-btn" data-filter="разработчик">Разработчики</button>
+    <button class="filter-btn" data-filter="руководитель">Руководители</button>
+    <button class="filter-btn" data-filter="владелец">Владельцы</button>
+    <button class="filter-btn" data-filter="администратор">Админы</button>
+    <button class="filter-btn" data-filter="ожидание">Ожидание</button>
+  </div>
+
+  <div class="card-container" id="cardContainer">
+
+    <!-- Кирилл -->
+    <div class="card yellow" data-search="олейников кирилл андреевич soldi_n владелец zerotix studio руководитель разработчик">
+      <div class="ribbon blue">Владелец</div>
+      <div class="card-content">
+        <h2>Олейников Кирилл Андреевич</h2>
+        <div class="nickname">@Soldi_n</div>
+        <div class="tag">Разработчик • Руководитель</div>
+        <div class="role">Роль: Zerotix.Studio</div>
+        <div class="info">
+          Discord: @Soldi_n<br/>
+          Telegram: @Soldi_n<br/>
+          Возраст: 15 лет<br/>
+          Дата рождения: 12.09.2010
+        </div>
+      </div>
+    </div>
+
+    <!-- StepByCode -->
+    <div class="card blue" data-search="stepbycode разработчик руководитель stuff zerotix studio">
+      <div class="card-content">
+        <h2>СКРЫТО</h2>
+        <div class="nickname">@StepByCode</div>
+        <div class="tag">Разработчик • Руководитель Stuff</div>
+        <div class="role">Роль: Zerotix.Studio</div>
+        <div class="info">
+          Discord: @StepByCode<br/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Заморожен -->
+    <div class="card blue" data-search="adel_kalashnikov t0w4kx aster_zaika заморожен ожидание zerotix">
+      <div class="ribbon blue">Заморожен</div>
+      <div class="card-content">
+        <h2>Adel_Kalashnikov</h2>
+        <div class="nickname">@t0w4kx</div>
+        <div class="tag">Zerotix - ожидание</div>
+        <div class="info">
+          Discord: @aster_zaika<br/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Удалён -->
+    <div class="card red deleted" data-search="deleted user удален">
+      <div class="ribbon red">Удалён</div>
+      <div class="card-content">
+        <h2>Unknown User</h2>
+        <div class="nickname">@t0w4kx</div>
+        <div class="tag">Бывший участник</div>
+        <div class="info">
+          Аккаунт удалён из Zerotix.Studio<br/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maks -->
+    <div class="card blue" data-search="maks.business администратор новое">
+      <div class="ribbon blue">Новое</div>
+      <div class="card-content">
+        <h2>Неизвестно</h2>
+        <div class="nickname">@maks.business</div>
+        <div class="tag">Администратор</div>
+        <div class="info">
+          Discord: @maks.business<br/>
+          Telegram: @@Bmy_offical
+          Возраст: 15 лет<br/>
+          Дата рождения: 08.12.10
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const input=document.getElementById("searchInput");
+    const clearBtn=document.getElementById("clearBtn");
+    const cards=Array.from(document.querySelectorAll(".card"));
+    const filters=document.querySelectorAll(".filter-btn");
+
+    const normalize=s=>(s||"").toLowerCase().replace(/[@._\-\s]+/g," ").trim();
+
+    function applySearchAndFilter(){
+      const q=normalize(input.value);
+      const activeFilter=document.querySelector(".filter-btn.active").dataset.filter;
+      cards.forEach(card=>{
+        const hay=normalize(card.dataset.search+" "+card.textContent);
+        const matchSearch=!q||hay.includes(q);
+        const matchFilter=activeFilter==="all"||hay.includes(activeFilter);
+        card.style.display=(matchSearch&&matchFilter)?"":"none";
+      });
+    }
+
+    input.addEventListener("input",applySearchAndFilter);
+    clearBtn.addEventListener("click",()=>{input.value="";applySearchAndFilter();});
+    filters.forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        filters.forEach(b=>b.classList.remove("active"));
+        btn.classList.add("active");
+        applySearchAndFilter();
+      });
+    });
+
+    // Тема
+    const toggle=document.getElementById("themeToggle");
+    function setTheme(theme){
+      document.documentElement.setAttribute("data-theme",theme);
+      localStorage.setItem("theme",theme);
+      toggle.textContent=theme==="light"?"☀️":"🌙";
+    }
+    const saved=localStorage.getItem("theme")||"dark";
+    setTheme(saved);
+    toggle.addEventListener("click",()=>{
+      const newTheme=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
+      setTheme(newTheme);
+    });
+
+    // Lazy-анимация
+    const observer=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    },{threshold:.2});
+    document.querySelectorAll(".card").forEach(card=>observer.observe(card));
+  </script>
+</body>
+</html>
