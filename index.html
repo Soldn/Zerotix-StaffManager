@@ -19,14 +19,6 @@
       --red:#ff3b3b;
     }
 
-    [data-theme="light"] {
-      --bg:#f7f7f9;
-      --panel:#ffffff;
-      --panel-2:#f0f0f2;
-      --txt:#111;
-      --muted:#333;
-    }
-
     *{box-sizing:border-box}
     body{
       margin:0; padding:0;
@@ -41,13 +33,16 @@
     header{
       margin:40px 0 10px;
       font-size:2.2rem; font-weight:700; letter-spacing:2px;
-      color:var(--accent); text-shadow:0 0 10px var(--accent);
+      color:var(--accent); /* по умолчанию синий */
+      text-shadow:0 0 10px var(--accent);
+      transition: color .3s, text-shadow .3s;
     }
 
-    .theme-toggle {
+    /* Верхние кнопки */
+    .bg-toggle, .user-badge, .logout-btn {
       position:absolute;
-      top:25px; right:25px;
-      font-size:1.4rem;
+      top:20px;
+      font-size:1rem;
       cursor:pointer;
       background:none;
       border:2px solid var(--accent);
@@ -55,14 +50,26 @@
       width:40px; height:40px;
       display:flex; align-items:center; justify-content:center;
       color:var(--accent);
-      transition:all .3s ease;
+      transition:all .25s ease;
+      outline:none;
     }
-    .theme-toggle:hover {
-      background:var(--accent);
-      color:#fff;
-      box-shadow:0 0 15px var(--accent);
+    #bgToggle{ right:25px; }
+    #userBadge{
+      right:80px; width:auto; padding:6px 14px; height:auto;
+      border-radius:999px; outline:none;
+    }
+    #logoutBtn{
+      right:80px; top:70px; border-radius:12px; width:auto; height:auto; padding:6px 10px;
+      display:none;
     }
 
+    .user-badge:hover, .logout-btn:hover, .bg-toggle:hover {
+      background: radial-gradient(circle at center, rgba(0,170,255,0.25), rgba(0,170,255,0.08));
+      box-shadow: 0 0 12px rgba(0,170,255,0.45);
+      border-color: transparent;
+    }
+
+    /* Поиск и фильтры */
     .search-box{ margin:10px 0 15px; width:100%; display:flex; justify-content:center; flex-wrap:wrap; gap:15px; }
     .search{
       width:min(680px,90vw);
@@ -155,6 +162,7 @@
       color:#fff;
       border-radius:12px;
       z-index:5;
+      opacity:0.95;
     }
     .ribbon.blue { background:linear-gradient(90deg, var(--accent), var(--accent-2)); }
     .ribbon.red { background:linear-gradient(90deg, #ff3b3b, #aa0000); }
@@ -170,15 +178,71 @@
     .role{ font-weight:700; margin-bottom:10px; color:#e9eef7; }
     .info{ color:#c9cdd3; line-height:1.6; }
 
+    /* Оверлей авторизации */
+    .overlay {
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.93);
+      backdrop-filter: blur(14px);
+      display:flex; align-items:center; justify-content:center;
+      z-index:9999;
+    }
+    .login-card{
+      width:min(420px,92vw);
+      background:linear-gradient(180deg, #0f0f13, #131317);
+      padding:28px; border-radius:14px;
+      border:2px solid rgba(255,255,255,.06);
+      box-shadow:0 10px 40px rgba(0,0,0,.6);
+      color:var(--txt);
+    }
+    .login-card h3 { margin:0 0 12px; }
+    .login-card label{ display:block; font-size:0.9rem; margin:8px 0 4px; color:var(--muted); }
+    .login-card input{
+      width:100%; padding:10px 12px; border-radius:8px; border:0; outline:0;
+      background:rgba(255,255,255,0.03); color:var(--txt);
+    }
+    .login-card .actions{ margin-top:14px; display:flex; justify-content:flex-end; }
+    .btn { padding:10px 14px; border-radius:8px; font-weight:700; cursor:pointer; border:0; }
+    .btn.primary{ background:var(--accent); color:#fff; }
+
+    .error-msg {
+      margin-top:10px;
+      background:rgba(255,0,0,0.15);
+      border:1px solid var(--red);
+      border-radius:8px;
+      color:var(--red);
+      padding:8px 12px;
+      font-weight:600;
+      text-align:center;
+      display:none;
+      animation:fadeIn .3s ease;
+    }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(5px);} to{opacity:1;transform:translateY(0);} }
+
+    /* Модалка */
+    .modal {
+      position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+      background:var(--panel); padding:18px; border-radius:12px; z-index:10001;
+      border:2px solid rgba(255,255,255,0.06); min-width:280px; max-width:92vw;
+      display:none;
+    }
+    .modal.show{ display:block; }
+    .modal .close{ position:absolute; right:8px; top:8px; cursor:pointer; background:none; border:0; color:var(--muted); }
+
     @media (max-width:600px){
       header{ font-size:1.9rem }
       .card{ max-width:100% }
+      #userBadge{ right:12px; top:70px; }
+      #logoutBtn{ right:12px; top:112px; }
     }
   </style>
 </head>
 <body>
-  <header>ZeroTix</header>
-  <button class="theme-toggle" id="themeToggle" title="Переключить тему">🌙</button>
+  <header id="pageTitle">ZeroTix</header>
+
+  <!-- Кнопки справа сверху -->
+  <button class="bg-toggle" id="bgToggle" title="Включить/выключить задний фон">🖼️</button>
+  <button class="user-badge" id="userBadge" title="Нажми, чтобы посмотреть свою информацию" style="display:none"></button>
+  <button class="logout-btn" id="logoutBtn" title="Выйти">⎋</button>
 
   <div class="search-box">
     <div class="search">
@@ -196,6 +260,7 @@
     <button class="filter-btn" data-filter="ожидание">Ожидание</button>
   </div>
 
+  <!-- КАРТОЧКИ (как в исходном файле) -->
   <div class="card-container" id="cardContainer">
 
     <!-- Кирилл -->
@@ -228,19 +293,6 @@
       </div>
     </div>
 
-    <!-- Заморожен -->
-    <div class="card blue" data-search="adel_kalashnikov t0w4kx aster_zaika заморожен ожидание zerotix">
-      <div class="ribbon blue">Заморожен</div>
-      <div class="card-content">
-        <h2>Adel_Kalashnikov</h2>
-        <div class="nickname">@t0w4kx</div>
-        <div class="tag">Zerotix - ожидание</div>
-        <div class="info">
-          Discord: @aster_zaika<br/>
-        </div>
-      </div>
-    </div>
-
     <!-- Удалён -->
     <div class="card red deleted" data-search="deleted user удален">
       <div class="ribbon red">Удалён</div>
@@ -258,12 +310,12 @@
     <div class="card blue" data-search="maks.business администратор новое">
       <div class="ribbon blue">Новое</div>
       <div class="card-content">
-        <h2>Неизвестно</h2>
+        <h2>СКРЫТО</h2>
         <div class="nickname">@maks.business</div>
         <div class="tag">Администратор</div>
         <div class="info">
           Discord: @maks.business<br/>
-          Telegram: @@Bmy_offical
+          Telegram: @@Bmy_offical<br/>
           Возраст: 15 лет<br/>
           Дата рождения: 08.12.10
         </div>
@@ -271,13 +323,34 @@
     </div>
   </div>
 
+  <!-- Авторизация -->
+  <div class="overlay" id="loginOverlay">
+    <div class="login-card">
+      <h3>Авторизация</h3>
+      <label>Никнейм</label>
+      <input id="loginNick" placeholder="@ник">
+      <label>Пароль</label>
+      <input id="loginPass" type="password" placeholder="Пароль">
+      <div id="errorMsg" class="error-msg"></div>
+      <div class="actions"><button class="btn primary" id="loginBtn">Войти</button></div>
+    <!--  <div style="margin-top:8px; color:var(--muted); font-size:.9rem">Тест: @Soldi_n / 1kbgthcjjkK и @StepByCode / 1kbgthcjjkK</div>-->
+    </div>
+  </div>
+
+  <!-- Модалка профиля -->
+  <div class="modal" id="userModal">
+    <button class="close" id="closeModal">✖</button>
+    <div id="modalContent"></div>
+  </div>
+
   <script>
+    // ---------- ПОИСК/ФИЛЬТР ----------
     const input=document.getElementById("searchInput");
     const clearBtn=document.getElementById("clearBtn");
     const cards=Array.from(document.querySelectorAll(".card"));
     const filters=document.querySelectorAll(".filter-btn");
 
-    const normalize=s=>(s||"").toLowerCase().replace(/[@._\-\s]+/g," ").trim();
+    const normalize=s=>(s||"").toLowerCase().replace(/[@._\\-\\s]+/g," ").trim();
 
     function applySearchAndFilter(){
       const q=normalize(input.value);
@@ -300,21 +373,28 @@
       });
     });
 
-    // Тема
-    const toggle=document.getElementById("themeToggle");
-    function setTheme(theme){
-      document.documentElement.setAttribute("data-theme",theme);
-      localStorage.setItem("theme",theme);
-      toggle.textContent=theme==="light"?"☀️":"🌙";
+    // ---------- ФОН КАРТИНКА / ЦВЕТ ЗАГОЛОВКА ----------
+    const bgToggle=document.getElementById("bgToggle");
+    const pageTitle=document.getElementById("pageTitle");
+
+    function applyBackground(){
+      const enabled=localStorage.getItem("bgEnabled")==="true";
+      document.body.style.background=enabled
+        ? "url('stuffpng/img.jpg') center/cover no-repeat, radial-gradient(circle at top, #101018 0%, var(--bg) 100%)"
+        : "radial-gradient(circle at top, #101018 0%, var(--bg) 100%)";
+      // цвет заголовка: с картинкой — чёрный; без — синий
+      pageTitle.style.color = enabled ? "#000" : "var(--accent)";
+      pageTitle.style.textShadow = enabled ? "none" : "0 0 10px var(--accent)";
     }
-    const saved=localStorage.getItem("theme")||"dark";
-    setTheme(saved);
-    toggle.addEventListener("click",()=>{
-      const newTheme=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
-      setTheme(newTheme);
+    if(localStorage.getItem("bgEnabled")===null) localStorage.setItem("bgEnabled","true");
+    applyBackground();
+    bgToggle.addEventListener("click",()=>{
+      const cur=localStorage.getItem("bgEnabled")==="true";
+      localStorage.setItem("bgEnabled",(!cur).toString());
+      applyBackground();
     });
 
-    // Lazy-анимация
+    // ---------- АНИМАЦИЯ КАРТОЧЕК ----------
     const observer=new IntersectionObserver(entries=>{
       entries.forEach(entry=>{
         if(entry.isIntersecting){
@@ -324,6 +404,134 @@
       });
     },{threshold:.2});
     document.querySelectorAll(".card").forEach(card=>observer.observe(card));
+
+    // ---------- АВТОРИЗАЦИЯ ----------
+    const loginOverlay=document.getElementById("loginOverlay");
+    const loginBtn=document.getElementById("loginBtn");
+    const loginNick=document.getElementById("loginNick");
+    const loginPass=document.getElementById("loginPass");
+    const errorMsg=document.getElementById("errorMsg");
+    const userBadge=document.getElementById("userBadge");
+    const logoutBtn=document.getElementById("logoutBtn");
+
+    const CREDENTIALS={
+      "@Soldi_n":"1kbgthcjjkK",
+      "@StepByCode":"1kbgthcjjkK"
+    };
+    const STORAGE_KEY="loggedUser";
+
+    function findCardByNick(nick){
+      if(!nick) return null;
+      const node = Array.from(document.querySelectorAll(".nickname"))
+        .find(el=>el.textContent.trim().toLowerCase()===nick.trim().toLowerCase());
+      return node ? node.closest(".card") : null;
+    }
+
+    function showOverlay(show){ loginOverlay.style.display=show?"flex":"none"; }
+
+    function setLoggedUser(nick){
+      if(!nick){
+        localStorage.removeItem(STORAGE_KEY);
+        userBadge.style.display="none";
+        logoutBtn.style.display="none";
+        showOverlay(true);
+        return;
+      }
+      localStorage.setItem(STORAGE_KEY, nick);
+      userBadge.textContent = nick;
+      userBadge.style.display = "inline-flex";
+      logoutBtn.style.display = "inline-flex";
+      showOverlay(false);
+    }
+
+    function showError(text){
+      errorMsg.textContent=text;
+      errorMsg.style.display="block";
+    }
+    function clearError(){ errorMsg.style.display="none"; }
+    loginPass.addEventListener("input",clearError);
+    loginNick.addEventListener("input",clearError);
+
+    function validateStoredUser(){
+      const nick = localStorage.getItem(STORAGE_KEY);
+      if(!nick) return false;
+      const card = findCardByNick(nick);
+      if(!card){
+        localStorage.removeItem(STORAGE_KEY);
+        userBadge.style.display="none";
+        logoutBtn.style.display="none";
+        return false;
+      }
+      userBadge.textContent = nick;
+      userBadge.style.display = "inline-flex";
+      logoutBtn.style.display = "inline-flex";
+      showOverlay(false);
+      return true;
+    }
+
+    // При загрузке
+    if(!validateStoredUser()){
+      showOverlay(true);
+    }
+
+    loginBtn.addEventListener("click",()=>{
+      const nick=(loginNick.value||"").trim();
+      const pass=(loginPass.value||"").trim();
+      if(!nick||!pass){ showError("Введите ник и пароль"); return; }
+      const expected=CREDENTIALS[nick];
+      if(!expected){ showError("Пользователь не найден"); return; }
+      if(pass!==expected){ showError("Неверный пароль"); return; }
+      const card=findCardByNick(nick);
+      if(!card){ showError("Карточка пользователя отсутствует на странице"); return; }
+      setLoggedUser(nick);
+    });
+
+    // Кнопка выхода
+    function logout(){
+      localStorage.removeItem(STORAGE_KEY);
+      userBadge.style.display="none";
+      logoutBtn.style.display="none";
+      showOverlay(true);
+    }
+    logoutBtn.addEventListener("click", logout);
+
+    // ENTER по паролю
+    loginPass.addEventListener("keydown", e=>{ if(e.key==="Enter") loginBtn.click(); });
+
+    // ---------- ПРОФИЛЬ (модалка с лентами) ----------
+    const userModal=document.getElementById("userModal");
+    const modalContent=document.getElementById("modalContent");
+    const closeModal=document.getElementById("closeModal");
+
+    userBadge.addEventListener("click", ()=>{
+      const nick=localStorage.getItem(STORAGE_KEY);
+      if(!nick){ showOverlay(true); return; }
+      const card = findCardByNick(nick);
+      if(!card){
+        alert("Ваша карточка была удалена — вы разлогинены.");
+        logout();
+        return;
+      }
+      // В модалку кладём и ленту .ribbon (если есть), и .card-content
+      const ribbon = card.querySelector(".ribbon") ? card.querySelector(".ribbon").outerHTML : "";
+      const content = card.querySelector(".card-content").outerHTML;
+      modalContent.innerHTML = ribbon + content;
+      userModal.classList.add("show");
+    });
+    closeModal.addEventListener("click", ()=> userModal.classList.remove("show"));
+
+    // ---------- АВТОВЫХОД при удалении карточки из HTML ----------
+    const domObserver = new MutationObserver(()=>{
+      const nick = localStorage.getItem(STORAGE_KEY);
+      if(nick && !findCardByNick(nick)){
+        alert("Карточка пользователя удалена из файла — выполнен выход.");
+        logout();
+      }
+    });
+    domObserver.observe(document.body, { childList:true, subtree:true });
+
+    // Применим фильтры изначально
+    applySearchAndFilter();
   </script>
 </body>
 </html>
